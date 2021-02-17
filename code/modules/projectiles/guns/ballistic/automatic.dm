@@ -296,7 +296,7 @@
 		update_icon()
 
 //ATTACK HAND IGNORING PARENT RETURN VALUE
-/obj/item/gun/ballistic/automatic/l6_saw/attack_hand(mob/user)
+/obj/item/gun/ballistic/automatic/l6_saw/attack_hand(mob/user, list/modifiers)
 	if (loc != user)
 		..()
 		return
@@ -340,6 +340,8 @@
 	slot_flags = ITEM_SLOT_BACK
 	actions_types = list()
 	mag_display = TRUE
+	suppressor_x_offset = 3
+	suppressor_y_offset = 3
 
 /obj/item/gun/ballistic/automatic/sniper_rifle/syndicate
 	name = "syndicate sniper rifle"
