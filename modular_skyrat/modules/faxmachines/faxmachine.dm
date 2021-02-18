@@ -44,15 +44,11 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	if( !(("[department]" in GLOB.alldepartments) || ("[department]" in GLOB.admin_departments)) )
 		GLOB.alldepartments |= department
 
-/*
 /obj/machinery/photocopier/faxmachine/longrange
 	name = "long range fax machine"
 	fax_network = "Central Command Quantum Entanglement Network"
 	long_range_enabled = TRUE
 	icon_state = "longfax"
-	insert_anim = "longfaxsend"
-	print_anim = "longfaxreceive"
-*/
 
 /obj/machinery/photocopier/faxmachine/attack_hand(mob/user)
 	ui_interact(user)
@@ -130,9 +126,10 @@ GLOBAL_LIST_EMPTY(alldepartments)
 		if("send")
 			if(paper_copy && is_authenticated)
 				if((destination in GLOB.admin_departments) || (destination in GLOB.hidden_admin_departments))
-					flick("faxsend", src)
+					flick("longfaxsend", src)
 					send_admin_fax(usr, destination)
 				else
+					flick("faxsend", src)
 					sendfax(destination,usr)
 
 				if(sendcooldown)
