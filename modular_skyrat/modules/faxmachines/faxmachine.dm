@@ -75,7 +75,6 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	obj_flags |= EMAGGED
 	to_chat(user, "<span class='notice'>The transmitters realign to an unknown source!</span>")
 
-
 /obj/machinery/photocopier/faxmachine/ui_interact(mob/user, datum/tgui/ui)
 	ui = SStgui.try_update_ui(user, src, ui)
 	if(!ui)

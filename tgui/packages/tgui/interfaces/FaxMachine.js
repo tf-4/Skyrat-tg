@@ -1,169 +1,71 @@
-import { ProgressBar, NumberInput, Button, Section, Box, Flex } from '../components';
 import { useBackend } from '../backend';
-import { Window } from '../layouts';
+import { Window, Box, Button, LabeledList, Section } from '../components';
+import { LabeledListItem } from '../components/LabeledList';
+//import { Fragment } from 'inferno';
 
 export const FaxMachine = (props, context) => {
-  const { data } = useBackend(context);
-  const {
-    isAI,
-    authenticated,
-    has_item,
-  } = data;
+  const { act, data } = useBackend(props);
 
   return (
+    //<Fragment>
     <Window
-      title="Fax Machine"
-      width={240}
-      height={isAI ? 309 : 234}>
-      <Window.Content>
-        {authenticated ? (
-          <Auth />
-        ) : (
-          <Section title="Authentication">
-            <Box color="average">
-              No inserted identification.
+      title="Fax Machine">
+      <Section title="Authorization" >
+        <LabeledList>
+          <LabeledListItem label="Confirm Identity:">
+            <Button
+              icon={"eject"}
+              onClick={() => act('scan')}
+              content={data.scan_name} />
+          </LabeledListItem>
+          <LabeledListItem label="Authorize:">
+            <Button
+              icon={data.authenticated ? "unlock" : "lock"}
+              onClick={() => act('auth')}
+              content={data.authenticated ? 'Log Out' : 'Log In'} />
+          </LabeledListItem>
+        </LabeledList>
+      </Section>
+
+      <Section title="Fax Menu" >
+        <LabeledList>
+          <LabeledListItem label="Network">
+            <Box color="label">
+              {data.network}
             </Box>
-          </Section>
-        )}
-        {has_item ? (
-          <Options />
-        ) : (
-          <Section title="Options">
-            <Box color="average">
-              No inserted item.
-            </Box>
-          </Section>
-        )}
-        {!!isAI && (
-          <AIOptions />
-        )}
-      </Window.Content>
+          </LabeledListItem>
+          <LabeledListItem label="Currently Sending">
+            <Button
+              icon={"eject"}
+              onClick={() => act('paper')}
+              content={data.paper} />
+            <Button
+              icon={'pencil'}
+              onClick={() => act('rename')}
+              content={"Rename"}
+              disabled={!data.paperinserted}
+            />
+          </LabeledListItem>
+          <LabeledListItem label="Sending to">
+            <Button
+              icon={'print'}
+              onClick={() => act('dept')}
+              content={data.destination}
+              disabled={!data.authenticated} />
+          </LabeledListItem>
+          <LabeledListItem label="Action">
+            <Button
+              icon={data.cooldown && data.respectcooldown
+                ? 'clock-o'
+                : "envelope-o"}
+              onClick={() => act('send')}
+              content={data.cooldown && data.respectcooldown
+                ? "Realigning"
+                : "Send"} />
+          </LabeledListItem>
+        </LabeledList>
+      </Section>
     </Window>
-  );
-};
-
-const Auth = (props, context) => {
-  const { act, data } = useBackend(context);
-  const {
-    has_id,
-    authenticated,
-  } = data;
-
-  return (
-    <Section
-      title="ID"
-      buttons={
-        <Button
-          fluid
-          icon="eject"
-          content={id_name}
-          onClick={() => act('PRG_eject')} />
-      }>
-    </Section>
-  );
-};
-
-const Options = (props, context) => {
-  const { act, data } = useBackend(context);
-  const {
-    color_mode,
-    is_photo,
-    num_copies,
-    has_enough_toner,
-  } = data;
-
-  return (
-    <Section title="Options">
-      <Flex>
-        <Flex.Item
-          mt={0.4}
-          width={11}
-          color="label">
-          Make copies:
-        </Flex.Item>
-        <Flex.Item>
-          <NumberInput
-            animate
-            width={2.6}
-            height={1.65}
-            step={1}
-            stepPixelSize={8}
-            minValue={1}
-            maxValue={10}
-            value={num_copies}
-            onDrag={(e, value) => act('set_copies', {
-              num_copies: value,
-            })} />
-        </Flex.Item>
-        <Flex.Item>
-          <Button
-            ml={0.2}
-            icon="copy"
-            textAlign="center"
-            disabled={!has_enough_toner}
-            onClick={() => act('make_copy')}>
-            Copy
-          </Button>
-        </Flex.Item>
-      </Flex>
-      {!!is_photo && (
-        <Flex mt={0.5}>
-          <Flex.Item
-            mr={0.4}
-            width="50%">
-            <Button
-              fluid
-              textAlign="center"
-              selected={color_mode === "Greyscale"}
-              onClick={() => act('color_mode', {
-                mode: "Greyscale",
-              })}>
-              Greyscale
-            </Button>
-          </Flex.Item>
-          <Flex.Item
-            ml={0.4}
-            width="50%">
-            <Button
-              fluid
-              textAlign="center"
-              selected={color_mode === "Color"}
-              onClick={() => act('color_mode', {
-                mode: "Color",
-              })}>
-              Color
-            </Button>
-          </Flex.Item>
-        </Flex>
-      )}
-      <Button
-        mt={0.5}
-        textAlign="center"
-        icon="reply"
-        fluid
-        onClick={() => act('remove')}>
-        Remove item
-      </Button>
-    </Section>
-  );
-};
-
-const AIOptions = (props, context) => {
-  const { act, data } = useBackend(context);
-  const { can_AI_print } = data;
-
-  return (
-    <Section title="AI Options">
-      <Box>
-        <Button
-          fluid
-          icon="images"
-          textAlign="center"
-          disabled={!can_AI_print}
-          onClick={() => act('ai_photo')}>
-          Print photo from database
-        </Button>
-      </Box>
-    </Section>
+    //</Fragment>
   );
 };
