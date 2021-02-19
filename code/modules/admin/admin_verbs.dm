@@ -98,6 +98,7 @@ GLOBAL_LIST_INIT(admin_verbs_fun, list(
 	/client/proc/drop_bomb,
 	/client/proc/set_dynex_scale,
 	/client/proc/drop_dynex_bomb,
+	/client/proc/fax_panel,	// SKYRAT EDIT ADD - FAX MACHINE PORT
 	/client/proc/cinematic,
 	/client/proc/one_click_antag,
 	/client/proc/cmd_admin_add_freeform_ai_law,

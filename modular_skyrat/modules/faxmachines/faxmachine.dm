@@ -21,7 +21,7 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	var/obj/item/card/id/scan = null // identification
 
 	var/authenticated = FALSE
-	var/sendcooldown = 0 // to avoid spamming fax messages
+	var/sendcooldown = 1800 // to avoid spamming fax messages
 	var/cooldown_time = 1800
 
 	var/department = "Unknown" // our department
@@ -100,12 +100,10 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	if(paper_copy)
 		data["paper"] = paper_copy.name
 		data["paperinserted"] = TRUE
-	else if(photo_copy)
-		data["paper"] = photo_copy.name
-		data["paperinserted"] = TRUE
 	else
 		data["paper"] = "-----"
 		data["paperinserted"] = FALSE
+
 	data["destination"] = destination
 	data["cooldown"] = sendcooldown
 
@@ -124,7 +122,7 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	var/is_authenticated = is_authenticated(usr)
 	switch(action)
 		if("send")
-			if(paper_copy && is_authenticated)
+			if(is_authenticated)
 				if((destination in GLOB.admin_departments) || (destination in GLOB.hidden_admin_departments))
 					flick("longfaxsend", src)
 					send_admin_fax(usr, destination)
@@ -134,40 +132,9 @@ GLOBAL_LIST_EMPTY(alldepartments)
 
 				if(sendcooldown)
 					addtimer(CALLBACK(src, .proc/handle_cooldown, action, params), sendcooldown)
-/*
-		if("paper")
-			if(paper_copy)
-				paper_copy.forceMove(get_turf(src))
-				if(ishuman(usr))
-					if(!usr.get_active_held_item() && Adjacent(usr))
-						usr.put_in_hands(paper_copy)
-				to_chat(usr, "<span class='notice'>You eject [paper_copy] from [src].</span>")
-				paper_copy = null
-			else if (photo_copy)
-				photo_copy.forceMove(get_turf(src))
-				if(ishuman(usr))
-					if(!usr.get_active_held_item() && Adjacent(usr))
-						usr.put_in_hands(photo_copy)
-				to_chat(usr, "<span class='notice'>You eject [photo_copy] from [src].</span>")
-				photo_copy = null
-			else
-				var/obj/item/I = usr.get_active_held_item()
-				if(istype(I, /obj/item/paper))
-					usr.dropItemToGround(I)
-					paper_copy = I
-					do_insertion(I, usr)
-				else if (istype(I, /obj/item/photo))
-					usr.dropItemToGround(I)
-					photo_copy = I
-					do_insertion(I, usr)
-*/
 		if("remove")
-			if(paper_copy)
-				remove_photocopy(paper_copy, usr)
-				paper_copy = null
-			else if(photo_copy)
-				remove_photocopy(photo_copy, usr)
-				photo_copy = null
+			remove_photocopy(paper_copy, usr)
+			paper_copy = null
 		if("scan")
 			scan()
 		if("dept")
@@ -190,14 +157,11 @@ GLOBAL_LIST_EMPTY(alldepartments)
 			else if(is_authenticated)
 				authenticated = FALSE
 		if("rename")
-			if(paper_copy || photo_copy)
+			if(paper_copy)
 				var/n_name = sanitize(copytext(input(usr, "What would you like to label the fax?", "Fax Labelling", paper_copy.name)  as text, 1, MAX_MESSAGE_LEN))
 				if(usr.stat == 0)
-					if(paper_copy && paper_copy.loc == src)
-						paper_copy.name = "[(n_name ? text("[n_name]") : initial(paper_copy.name))]"
-						paper_copy.desc = "This is a paper titled '" + paper_copy.name + "'."
-					else if(photo_copy && photo_copy.loc == src)
-						photo_copy.name = "[(n_name ? text("[n_name]") : "photo")]"
+					paper_copy.name = "[(n_name ? text("[n_name]") : initial(paper_copy.name))]"
+					paper_copy.desc = "This is a paper titled '" + paper_copy.name + "'."
 
 /obj/machinery/photocopier/faxmachine/proc/handle_cooldown(action, params)
 	sendcooldown = 0
@@ -217,12 +181,12 @@ GLOBAL_LIST_EMPTY(alldepartments)
 		scan = null
 	else if(Adjacent(usr))
 		if(!card)
-			var/obj/item/I = usr.get_active_held_item()
-			if(istype(I, /obj/item/card/id))
-				if(!usr.dropItemToGround(I))
+			var/obj/item/held_item = usr.get_active_held_item()
+			if(istype(held_item, /obj/item/card/id))
+				if(!usr.dropItemToGround(held_item))
 					return
-				I.forceMove(src)
-				scan = I
+				held_item.forceMove(src)
+				scan = held_item
 		else if(istype(card))
 			if(!usr.dropItemToGround(card))
 				return
@@ -253,19 +217,19 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	use_power(200)
 
 	var/success = FALSE
-	for(var/thing in GLOB.allfaxes)
-		var/obj/machinery/photocopier/faxmachine/F = thing
-		if( F.department == destination )
-			success = F.receivefax(paper_copy)
+	for(var/target in GLOB.allfaxes)
+		var/obj/machinery/photocopier/faxmachine/target_machine = target
+		if(target_machine.department == destination)
+			success = target_machine.receivefax(paper_copy)
 	if(success != FALSE && department != destination)
-		var/datum/fax/F = new /datum/fax()
-		F.name = paper_copy.name
-		F.from_department = department
-		F.to_department = destination
-		F.origin = src
-		F.message = paper_copy
-		F.sent_by = sender
-		F.sent_at = world.time
+		var/datum/fax/rcvdFax = new /datum/fax()
+		rcvdFax.name = paper_copy.name
+		rcvdFax.from_department = department
+		rcvdFax.to_department = destination
+		rcvdFax.origin = src
+		rcvdFax.message = paper_copy
+		rcvdFax.sent_by = sender
+		rcvdFax.sent_at = world.time
 		visible_message("<span class='notice'>[src] beeps, \"Message transmitted successfully.\"</span>")
 
 	else if(destination == department)
@@ -277,7 +241,7 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	else
 		visible_message("<span class='notice'>[src] beeps, \"Error transmitting message.\"</span>")
 
-/obj/machinery/photocopier/faxmachine/proc/receivefax(var/obj/item/incoming)
+/obj/machinery/photocopier/faxmachine/proc/receivefax(var/obj/item/paper/incoming)
 	if(machine_stat & (BROKEN|NOPOWER))
 		return FALSE
 
@@ -286,22 +250,34 @@ GLOBAL_LIST_EMPTY(alldepartments)
 
 	handle_animation()
 	//give the sprite some time to flick
-	addtimer(CALLBACK(src, .proc/handle_copying, incoming), 20)
+	addtimer(CALLBACK(src, handle_copying(incoming)), 20)
 
 //Prevents copypasta for evil faxes
 /obj/machinery/photocopier/faxmachine/proc/handle_animation()
 	flick("faxrecieve", src)
 	playsound(loc, 'modular_skyrat/modules/faxmachines/sound/printer_dotmatrix.ogg', 50, 1)
 
-/obj/machinery/photocopier/faxmachine/proc/handle_copying(var/obj/item/incoming)
+/obj/machinery/photocopier/faxmachine/proc/handle_copying(var/obj/item/paper/incoming)
 	use_power(active_power_usage)
-	if(istype(incoming, /obj/item/paper))
-		make_paper_copy(incoming)
-	else if(istype(incoming, /obj/item/photo))
-		make_photo_copy(incoming)
-	else
-		return FALSE
+	//if(istype(incoming, /obj/item/paper))
+		//make_paper_copy(incoming)
+	//else
+		//return FALSE
 
+	var/obj/item/paper/copied_paper = new(loc)
+	give_pixel_offset(copied_paper)
+
+	var/copied_info = incoming.info
+	copied_info = replacetext(copied_info, "<font face=\"[PEN_FONT]\" color=", "<font face=\"[PEN_FONT]\" nocolor=")	//state of the art techniques in action
+	copied_info = replacetext(copied_info, "<font face=\"[CRAYON_FONT]\" color=", "<font face=\"[CRAYON_FONT]\" nocolor=")	//This basically just breaks the existing color tag, which we need to do because the innermost tag takes priority.
+	copied_paper.info += copied_info
+	copied_paper.info += "</font>"
+	copied_paper.name = incoming.name
+	copied_paper.update_icon()
+	copied_paper.stamps = incoming.stamps
+	if(incoming.stamped)
+		copied_paper.stamped = incoming.stamped.Copy()
+	copied_paper.copy_overlays(incoming, TRUE)
 	return TRUE
 
 /obj/machinery/photocopier/faxmachine/proc/send_admin_fax(var/mob/sender, var/destination)
@@ -312,33 +288,32 @@ GLOBAL_LIST_EMPTY(alldepartments)
 		return
 
 	use_power(200)
-
+/*
 	var/obj/item/rcvdcopy
 	if(paper_copy)
-		rcvdcopy = make_paper_copy(paper_copy)
-	else if(photo_copy)
-		rcvdcopy = make_photo_copy(photo_copy)
+		//rcvdcopy = make_paper_copy(paper_copy)
+		rcvdcopy = paper_copy
 	else
 		visible_message("<span class='notice'>[src] beeps, \"Error transmitting message.\"</span>")
 		return
 
 	rcvdcopy.loc = null //hopefully this shouldn't cause trouble
-
-	var/datum/fax/admin/A = new /datum/fax/admin()
-	A.name = rcvdcopy.name
-	A.from_department = department
-	A.to_department = destination
-	A.origin = src
-	A.message = rcvdcopy
-	A.sent_by = sender
-	A.sent_at = world.time
+*/
+	var/datum/fax/admin/AdminFax = new /datum/fax/admin()
+	AdminFax.name = paper_copy.name
+	AdminFax.from_department = department
+	AdminFax.to_department = destination
+	AdminFax.origin = src
+	AdminFax.message = paper_copy
+	AdminFax.sent_by = sender
+	AdminFax.sent_at = world.time
 
 	//message badmins that a fax has arrived
 	switch(destination)
 		if("Central Command")
-			message_admins(sender, "CENTCOM FAX", destination, rcvdcopy, "#006100")
+			message_admins(sender, "CENTCOM FAX", destination, paper_copy, "#006100")
 		if("Syndicate")
-			message_admins(sender, "SYNDICATE FAX", destination, rcvdcopy, "#DC143C")
+			message_admins(sender, "SYNDICATE FAX", destination, paper_copy, "#DC143C")
 	sendcooldown = cooldown_time
 	visible_message("<span class='notice'>[src] beeps, \"Message transmitted successfully.\"</span>")
 

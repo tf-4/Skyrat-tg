@@ -37,7 +37,7 @@ export const FaxMachine = (props, context) => {
             <LabeledListItem label="Currently Sending">
               <Button
                 icon={"eject"}
-                onClick={() => act('paper')}
+                onClick={() => {data.paperinserted ? act('remove') : act('paper')}}
                 content={data.paper} />
               <Button
                 icon={'pencil'}

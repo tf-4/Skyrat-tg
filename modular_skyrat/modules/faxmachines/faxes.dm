@@ -23,67 +23,66 @@ GLOBAL_LIST_EMPTY(adminfaxes)
 // Fax panel - lets admins check all faxes sent during the round
 /client/proc/fax_panel()
 	set name = "Fax Panel"
-	set category = "Fun"
+	set category = "Admin.Fun"
 	if(holder)
-		holder.fax_panel(usr)
+		holder.Fax(usr)
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Fax Panel") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
-	return
 
-/datum/admins/proc/fax_panel(var/mob/living/user)
-	var/html = "<A align='right' href='?src=[REF()];[HrefToken(TRUE)];refreshfaxpanel=1'>Refresh</A>"
-	html += "<A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxCreate=1;faxtype=Custom'>Create Fax</A>"
+/datum/admins/proc/Fax(var/mob/living/user)
+	var/dat = "<A align='right' href='?src=[REF()];[HrefToken(TRUE)];refreshfaxpanel=1'>Refresh</A>"
+	dat += "<A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxCreate=1;faxtype=Custom'>Create Fax</A>"
 
-	html += "<div class='block'>"
-	html += "<h2>Admin Faxes</h2>"
-	html += "<table>"
-	html += "<tr style='font-weight:bold;'><td width='150px'>Name</td><td width='150px'>From Department</td><td width='150px'>To Department</td><td width='75px'>Sent At</td><td width='150px'>Sent By</td><td width='50px'>View</td><td width='50px'>Reply</td><td width='75px'>Replied To</td></td></tr>"
+	dat += "<div class='block'>"
+	dat += "<h2>Admin Faxes</h2>"
+	dat += "<table>"
+	dat += "<tr style='font-weight:bold;'><td width='150px'>Name</td><td width='150px'>From Department</td><td width='150px'>To Department</td><td width='75px'>Sent At</td><td width='150px'>Sent By</td><td width='50px'>View</td><td width='50px'>Reply</td><td width='75px'>Replied To</td></td></tr>"
 	for(var/thing in GLOB.adminfaxes)
-		var/datum/fax/admin/A = thing
-		html += "<tr>"
-		html += "<td>[A.name]</td>"
-		html += "<td>[A.from_department]</td>"
-		html += "<td>[A.to_department]</td>"
-		html += "<td>[worldtime2text(A.sent_at)]</td>"
-		if(A.sent_by)
-			var/mob/living/S = A.sent_by
-			html += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(A.sent_by)]'>[S.name]</A></td>"
+		var/datum/fax/admin/rcvdfax = thing
+		dat += "<tr>"
+		dat += "<td>[rcvdfax.name]</td>"
+		dat += "<td>[rcvdfax.from_department]</td>"
+		dat += "<td>[rcvdfax.to_department]</td>"
+		dat += "<td>[worldtime2text(rcvdfax.sent_at)]</td>"
+		if(rcvdfax.sent_by)
+			var/mob/living/sender = rcvdfax.sent_by
+			dat += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(rcvdfax.sent_by)]'>[sender.name]</A></td>"
 		else
-			html += "<td>Unknown</td>"
-		html += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(A.message)]'>View</A></td>"
-		if(!A.reply_to)
-			if(A.from_department == "Administrator")
-				html += "<td>N/A</td>"
+			dat += "<td>Unknown</td>"
+		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.message)]'>View</A></td>"
+		if(!rcvdfax.reply_to)
+			if(rcvdfax.from_department == "Administrator")
+				dat += "<td>N/A</td>"
 			else
-				html += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxCreate=[REF(A.sent_by)];originfax=[REF(A.origin)];faxtype=[A.to_department];replyto=[REF(A.message)]'>Reply</A></td>"
-			html += "<td>N/A</td>"
+				dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxCreate=[REF(rcvdfax.sent_by)];originfax=[REF(rcvdfax.origin)];faxtype=[rcvdfax.to_department];replyto=[REF(rcvdfax.message)]'>Reply</A></td>"
+			dat += "<td>N/A</td>"
 		else
-			html += "<td>N/A</td>"
-			html += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(A.reply_to)]'>Original</A></td>"
-		html += "</tr>"
-	html += "</table>"
-	html += "</div>"
+			dat += "<td>N/A</td>"
+			dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.reply_to)]'>Original</A></td>"
+		dat += "</tr>"
+	dat += "</table>"
+	dat += "</div>"
 
-	html += "<div class='block'>"
-	html += "<h2>Departmental Faxes</h2>"
-	html += "<table>"
-	html += "<tr style='font-weight:bold;'><td width='150px'>Name</td><td width='150px'>From Department</td><td width='150px'>To Department</td><td width='75px'>Sent At</td><td width='150px'>Sent By</td><td width='175px'>View</td></td></tr>"
+	dat += "<div class='block'>"
+	dat += "<h2>Departmental Faxes</h2>"
+	dat += "<table>"
+	dat += "<tr style='font-weight:bold;'><td width='150px'>Name</td><td width='150px'>From Department</td><td width='150px'>To Department</td><td width='75px'>Sent At</td><td width='150px'>Sent By</td><td width='175px'>View</td></td></tr>"
 	for(var/thing in GLOB.faxes)
 		var/datum/fax/F = thing
-		html += "<tr>"
-		html += "<td>[F.name]</td>"
-		html += "<td>[F.from_department]</td>"
-		html += "<td>[F.to_department]</td>"
-		html += "<td>[worldtime2text(F.sent_at)]</td>"
+		dat += "<tr>"
+		dat += "<td>[F.name]</td>"
+		dat += "<td>[F.from_department]</td>"
+		dat += "<td>[F.to_department]</td>"
+		dat += "<td>[worldtime2text(F.sent_at)]</td>"
 		if(F.sent_by)
 			var/mob/living/S = F.sent_by
-			html += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(F.sent_by)]'>[S.name]</A></td>"
+			dat += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(F.sent_by)]'>[S.name]</A></td>"
 		else
-			html += "<td>Unknown</td>"
-		html += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(F.message)]'>View</A></td>"
-		html += "</tr>"
-	html += "</table>"
-	html += "</div>"
+			dat += "<td>Unknown</td>"
+		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(F.message)]'>View</A></td>"
+		dat += "</tr>"
+	dat += "</table>"
+	dat += "</div>"
 
 	var/datum/browser/popup = new(user, "fax_panel", "Fax Panel", 950, 450)
-	popup.set_content(html)
+	popup.set_content(dat)
 	popup.open()
