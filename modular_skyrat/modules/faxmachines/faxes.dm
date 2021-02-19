@@ -67,18 +67,18 @@ GLOBAL_LIST_EMPTY(adminfaxes)
 	dat += "<table>"
 	dat += "<tr style='font-weight:bold;'><td width='150px'>Name</td><td width='150px'>From Department</td><td width='150px'>To Department</td><td width='75px'>Sent At</td><td width='150px'>Sent By</td><td width='175px'>View</td></td></tr>"
 	for(var/thing in GLOB.faxes)
-		var/datum/fax/F = thing
+		var/datum/fax/rcvdfax = thing
 		dat += "<tr>"
-		dat += "<td>[F.name]</td>"
-		dat += "<td>[F.from_department]</td>"
-		dat += "<td>[F.to_department]</td>"
-		dat += "<td>[worldtime2text(F.sent_at)]</td>"
-		if(F.sent_by)
-			var/mob/living/S = F.sent_by
-			dat += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(F.sent_by)]'>[S.name]</A></td>"
+		dat += "<td>[rcvdfax.name]</td>"
+		dat += "<td>[rcvdfax.from_department]</td>"
+		dat += "<td>[rcvdfax.to_department]</td>"
+		dat += "<td>[worldtime2text(rcvdfax.sent_at)]</td>"
+		if(rcvdfax.sent_by)
+			var/mob/living/sender = rcvdfax.sent_by
+			dat += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(rcvdfax.sent_by)]'>[sender.name]</A></td>"
 		else
 			dat += "<td>Unknown</td>"
-		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(F.message)]'>View</A></td>"
+		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.message)]'>View</A></td>"
 		dat += "</tr>"
 	dat += "</table>"
 	dat += "</div>"
