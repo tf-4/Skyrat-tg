@@ -25,10 +25,10 @@ GLOBAL_LIST_EMPTY(adminfaxes)
 	set name = "Fax Panel"
 	set category = "Admin.Fun"
 	if(holder)
-		holder.Fax(usr)
+		holder.fax_panel(usr)
 	SSblackbox.record_feedback("tally", "admin_verb", 1, "Fax Panel") //If you are copy-pasting this, ensure the 2nd parameter is unique to the new proc!
 
-/datum/admins/proc/Fax(var/mob/living/user)
+/datum/admins/proc/fax_panel(var/mob/living/user)
 	var/dat = "<A align='right' href='?src=[REF()];[HrefToken(TRUE)];refreshfaxpanel=1'>Refresh</A>"
 	dat += "<A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxCreate=1;faxtype=Custom'>Create Fax</A>"
 
@@ -48,7 +48,8 @@ GLOBAL_LIST_EMPTY(adminfaxes)
 			dat += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(rcvdfax.sent_by)]'>[sender.name]</A></td>"
 		else
 			dat += "<td>Unknown</td>"
-		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.message)]'>View</A></td>"
+		//dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.message)]'>View</A></td>"		ORIGINAL
+		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax)]'>View</A></td>"
 		if(!rcvdfax.reply_to)
 			if(rcvdfax.from_department == "Administrator")
 				dat += "<td>N/A</td>"
@@ -57,7 +58,8 @@ GLOBAL_LIST_EMPTY(adminfaxes)
 			dat += "<td>N/A</td>"
 		else
 			dat += "<td>N/A</td>"
-			dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.reply_to)]'>Original</A></td>"
+			//dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.reply_to)]'>Original</A></td>"		ORIGINAL
+			dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax)]'>Original</A></td>"
 		dat += "</tr>"
 	dat += "</table>"
 	dat += "</div>"
@@ -78,7 +80,8 @@ GLOBAL_LIST_EMPTY(adminfaxes)
 			dat += "<td><A HREF='?_src_=holder;[HrefToken(TRUE)];adminplayeropts=[REF(rcvdfax.sent_by)]'>[sender.name]</A></td>"
 		else
 			dat += "<td>Unknown</td>"
-		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.message)]'>View</A></td>"
+		//dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax.message)]'>View</A></td>"		ORIGINAL
+		dat += "<td><A align='right' href='?src=[REF()];[HrefToken(TRUE)];AdminFaxView=[REF(rcvdfax)]'>View</A></td>"
 		dat += "</tr>"
 	dat += "</table>"
 	dat += "</div>"

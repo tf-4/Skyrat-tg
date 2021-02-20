@@ -3774,6 +3774,7 @@
 #include "modular_skyrat\modules\faxmachines\faxes.dm"
 #include "modular_skyrat\modules\faxmachines\faxmachine.dm"
 #include "modular_skyrat\modules\faxmachines\photocopier.dm"
+#include "modular_skyrat\modules\faxmachines\topic.dm"
 #include "modular_skyrat\modules\firefighter\code\firefighter.dm"
 #include "modular_skyrat\modules\gunpoint\code\datum\gunpoint\gunpoint.dm"
 #include "modular_skyrat\modules\gunpoint\code\datum\gunpoint\gunpoint_datum.dm"
