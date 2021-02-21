@@ -21,8 +21,8 @@ GLOBAL_LIST_EMPTY(alldepartments)
 	var/obj/item/card/id/scan = null // identification
 
 	var/authenticated = FALSE
-	var/sendcooldown = 1800 // to avoid spamming fax messages
-	var/cooldown_time = 1800
+	var/sendcooldown = 0 // to avoid spamming fax messages
+	var/cooldown_time = 0 // SET TO 0 FOR DEBUG - DEFAULT IS 1800
 
 	var/department = "Unknown" // our department
 
