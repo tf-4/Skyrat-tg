@@ -57,6 +57,7 @@
 			to_chat(user, "<span class='notice'>You forge the official seal with a [C.crayon_color] crayon. No one will notice... right?</span>")
 			update_appearance()
 
+/*	SKYRAT EDIT START - MOVED TO MODULAR
 /**
  * # N-spect scanner
  *
@@ -382,6 +383,7 @@
 			power_per_print = INSPECTOR_POWER_USAGE_HONK
 			message = "HONK!"
 	balloon_alert(user, "You turn the screw-like dial, setting the device's scanning speed to [message]")
+*/ //SKYRAT EDIT END
 
 /**
  * Reports printed by fake N-spect scanner
